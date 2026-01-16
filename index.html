@@ -1,0 +1,327 @@
+import React, { useState, useMemo } from 'react';
+import { Search, Filter, Calendar, MapPin, ExternalLink, ChevronRight, Info } from 'lucide-react';
+
+const EVENTS_DATA = [
+  // JANEIRO
+  { id: 1, name: "Fenahall 2026", date: "09 a 18 de Janeiro", month: "Janeiro", location: "Classic Hall, Olinda - PE", segment: "Artesanato & Cultura", description: "Uma das maiores feiras de artesanato do Nordeste, reunindo cultura e negócios.", color: "bg-amber-100 text-amber-800" },
+  { id: 47, name: "Calcemoda 2026", date: "20 a 22 de Janeiro", month: "Janeiro", location: "Via Soft Experience, Curitiba - PR", segment: "Moda", description: "Foco em calçados, confecções e acessórios, conectando a indústria ao varejo do Sul.", color: "bg-rose-100 text-rose-800" },
+  { id: 3, name: "Inspiramais 2026 (1ª Edição)", date: "27 e 28 de Janeiro", month: "Janeiro", location: "Centro de Eventos FIERGS, Porto Alegre - RS", segment: "Moda", description: "Salão de Design e Inovação de Materiais, lançando tendências para a indústria da moda.", color: "bg-rose-100 text-rose-800" },
+  { id: 48, name: "Fenin Fashion Gramado", date: "27 a 30 de Janeiro", month: "Janeiro", location: "Serra Park, Gramado - RS", segment: "Moda", description: "Um dos maiores encontros de moda voltado ao varejo, apresentando coleções de outono/inverno.", color: "bg-rose-100 text-rose-800" },
+  { id: 44, name: "CIOSP 2026", date: "28 a 31 de Janeiro", month: "Janeiro", location: "Expo Center Norte, São Paulo - SP", segment: "Saúde", description: "O maior congresso de odontologia do mundo, reunindo inovações e profissionais do setor.", color: "bg-rose-100 text-rose-800" },
+  
+  // FEVEREIRO
+  { id: 4, name: "ABUP Show 2026", date: "02 a 05 de Fevereiro", month: "Fevereiro", location: "Distrito Anhembi, São Paulo - SP", segment: "Casa & Decoração", description: "Evento premium focado em utilidades domésticas, mesa posta e decoração.", color: "bg-indigo-100 text-indigo-800" },
+  { id: 5, name: "Show Rural Coopavel", date: "09 a 13 de Fevereiro", month: "Fevereiro", location: "Cascavel - PR", segment: "Agronegócio", description: "Referência em tecnologia agrícola e inovação para o campo.", color: "bg-green-100 text-green-800" },
+  
+  // MARÇO
+  { id: 49, name: "FIMEC 2026", date: "03 a 05 de Março", month: "Março", location: "Fenac, Novo Hamburgo - RS", segment: "Moda", description: "Feira internacional de couros, produtos químicos e componentes para calçados.", color: "bg-rose-100 text-rose-800" },
+  { id: 6, name: "Expo Revestir 2026", date: "10 a 13 de Março", month: "Março", location: "São Paulo Expo, São Paulo - SP", segment: "Construção", description: "A 'Fashion Week' da arquitetura e construção na América Latina.", color: "bg-orange-100 text-orange-800" },
+  { id: 7, name: "SRE Super Rio Expofood", date: "17 a 19 de Março", month: "Março", location: "Riocentro, Rio de Janeiro - RJ", segment: "Alimentos", description: "O melhor encontro do setor supermercadista e de panificação do Rio.", color: "bg-red-100 text-red-800" },
+  { id: 8, name: "Hair Brasil 2026", date: "21 a 24 de Março", month: "Março", location: "Expo Center Norte, São Paulo - SP", segment: "Beleza", description: "Feira internacional de beleza, cabelos e estética focada em salões e profissionais.", color: "bg-fuchsia-100 text-fuchsia-800" },
+  { id: 9, name: "South Summit Brazil", date: "25 a 27 de Março", month: "Março", location: "Cais Mauá, Porto Alegre - RS", segment: "Inovação", description: "Plataforma global de inovação, startups e conexões de alto impacto.", color: "bg-purple-100 text-purple-800" },
+  { id: 10, name: "Intermodal South America", date: "31 de Março a 02 de Abril", month: "Março", location: "São Paulo Expo, São Paulo - SP", segment: "Logística", description: "O maior evento das Américas para logística, transporte de carga e comércio exterior.", color: "bg-slate-100 text-slate-800" },
+  { id: 11, name: "FEICON 2026", date: "31 de Março a 03 de Abril", month: "Março", location: "São Paulo Expo, São Paulo - SP", segment: "Construção", description: "O evento de referência para os setores de construção civil e arquitetura.", color: "bg-orange-100 text-orange-800" },
+  { id: 12, name: "Smart City Expo Curitiba", date: "25 a 27 de Março", month: "Março", location: "Curitiba - PR", segment: "Tecnologia", description: "Edição brasileira do maior evento de cidades inteligentes do mundo.", color: "bg-blue-100 text-blue-800" },
+
+  // ABRIL
+  { id: 13, name: "Gramado Summit", date: "08 a 10 de Abril", month: "Abril", location: "Serra Park, Gramado - RS", segment: "Inovação", description: "O maior brainstorm da América Latina, focado em empreendedorismo e futuro.", color: "bg-purple-100 text-purple-800" },
+  { id: 50, name: "Rio Fashion Week (RIOFW)", date: "15 a 18 de Abril", month: "Abril", location: "Píer Mauá, Rio de Janeiro - RJ", segment: "Moda", description: "Retorno do grande evento de moda do Rio com foco em desfiles e geração de negócios.", color: "bg-rose-100 text-rose-800" },
+  { id: 14, name: "Mara Cakes Fair 2026", date: "14 a 17 de Abril", month: "Abril", location: "São Paulo Expo, São Paulo - SP", segment: "Gastronomia", description: "A maior feira de confeitaria do Brasil, reunindo as principais marcas e profissionais.", color: "bg-pink-100 text-pink-800" },
+  { id: 15, name: "Abradilan Conexão Farma", date: "14 a 16 de Abril", month: "Abril", location: "Expo Center Norte, São Paulo - SP", segment: "Saúde", description: "O maior evento de negócios do setor farmacêutico do Brasil.", color: "bg-rose-100 text-rose-800" },
+  { id: 16, name: "Web Summit Rio", date: "27 a 30 de Abril", month: "Abril", location: "Riocentro, Rio de Janeiro - RJ", segment: "Tecnologia", description: "A edição brasileira de um dos maiores eventos de tecnologia do mundo.", color: "bg-blue-100 text-blue-800" },
+  { id: 17, name: "Agrishow 2026", date: "27 de Abril a 01 de Maio", month: "Abril", location: "Ribeirão Preto - SP", segment: "Agronegócio", description: "A maior feira de tecnologia agrícola da América Latina.", color: "bg-green-100 text-green-800" },
+
+  // MAIO
+  { id: 51, name: "FebraTêxtil 2026", date: "05 a 07 de Maio", month: "Maio", location: "Expo Center Norte, São Paulo - SP", segment: "Moda", description: "Feira voltada para a cadeia têxtil e de confecção, focada em insumos e tecnologia.", color: "bg-rose-100 text-rose-800" },
+  { id: 18, name: "Vittude Summit 2026", date: "05 a 06 de Maio", month: "Maio", location: "São Paulo - SP", segment: "Saúde", description: "Evento focado em saúde mental corporativa e bem-estar no ambiente de trabalho.", color: "bg-rose-100 text-rose-800" },
+  { id: 19, name: "VTEX Day", date: "12 a 13 de Maio", month: "Maio", location: "São Paulo Expo, São Paulo - SP", segment: "Tecnologia", description: "Um dos maiores eventos de digital commerce do mundo.", color: "bg-blue-100 text-blue-800" },
+  { id: 20, name: "APAS Show 2026", date: "18 a 21 de Maio", month: "Maio", location: "Expo Center Norte, São Paulo - SP", segment: "Alimentos", description: "Maior feira de supermercados do mundo e motor de negócios do varejo.", color: "bg-red-100 text-red-800" },
+  { id: 21, name: "Hospitalar 2026", date: "19 a 22 de Maio", month: "Maio", location: "São Paulo Expo, São Paulo - SP", segment: "Saúde", description: "Principal evento de saúde das Américas para tecnologia médica.", color: "bg-rose-100 text-rose-800" },
+  { id: 22, name: "APRAS 2026", date: "12 a 14 de Maio", month: "Maio", location: "Expotrade, Pinhais - PR", segment: "Alimentos", description: "Feira e convenção paranaense de supermercados.", color: "bg-red-100 text-red-800" },
+
+  // JUNHO
+  { id: 23, name: "Fispal Food Service", date: "09 a 12 de Junho", month: "Junho", location: "Distrito Anhembi, São Paulo - SP", segment: "Gastronomia", description: "Referência absoluta para o setor de alimentação fora do lar e sorvetes.", color: "bg-pink-100 text-pink-800" },
+  { id: 24, name: "Naturaltech 2026", date: "10 a 13 de Junho", month: "Junho", location: "Distrito Anhembi, São Paulo - SP", segment: "Bem-estar", description: "Maior feira de produtos naturais e saudáveis da América Latina.", color: "bg-emerald-100 text-emerald-800" },
+  { id: 25, name: "Bio Brazil Fair", date: "10 a 13 de Junho", month: "Junho", location: "Distrito Anhembi, São Paulo - SP", segment: "Bem-estar", description: "O grande encontro do mercado orgânico no Brasil.", color: "bg-emerald-100 text-emerald-800" },
+  { id: 26, name: "São Paulo Coffee Festival", date: "19 a 21 de Junho", month: "Junho", location: "Fundação Bienal, São Paulo - SP", segment: "Gastronomia", description: "Evento que celebra a cultura do café especial.", color: "bg-pink-100 text-pink-800" },
+  { id: 27, name: "ABF Franchising Expo", date: "24 a 27 de Junho", month: "Junho", location: "Expo Center Norte, São Paulo - SP", segment: "Negócios", description: "A maior feira de franquias do mundo.", color: "bg-cyan-100 text-cyan-800" },
+
+  // JULHO
+  { id: 28, name: "Eletrolar Show 2026", date: "13 a 16 de Julho", month: "Julho", location: "Transamerica Expo, São Paulo - SP", segment: "Tecnologia", description: "A maior feira B2B de bens de consumo, eletroeletrônicos e TI.", color: "bg-blue-100 text-blue-800" },
+  { id: 29, name: "FIPAN 2026", date: "21 a 24 de Julho", month: "Julho", location: "Expo Center Norte, São Paulo - SP", segment: "Gastronomia", description: "Maior feira de panificação e confeitaria da América Latina.", color: "bg-pink-100 text-pink-800" },
+  { id: 30, name: "Logistique 2026", date: "21 a 23 de Julho", month: "Julho", location: "Joinville - SC", segment: "Logística", description: "Evento de logística e comércio exterior focado no Sul do Brasil.", color: "bg-slate-100 text-slate-800" },
+
+  // AGOSTO
+  { id: 31, name: "Escolar Office Brasil", date: "02 a 05 de Agosto", month: "Agosto", location: "Expo Center Norte, São Paulo - SP", segment: "Negócios", description: "Feira de papelaria, material escolar e escritório.", color: "bg-cyan-100 text-cyan-800" },
+  { id: 32, name: "ABCasa Fair 2026", date: "07 a 11 de Agosto", month: "Agosto", location: "Expo Center Norte, São Paulo - SP", segment: "Casa & Decoração", description: "O maior evento do setor de casa, decoração e presentes das Américas.", color: "bg-indigo-100 text-indigo-800" },
+  { id: 45, name: "Expo-Hospital Brasil", date: "11 a 13 de Agosto", month: "Agosto", location: "Expominas, Belo Horizonte - MG", segment: "Saúde", description: "Feira de tecnologias, equipamentos e serviços para hospitais e clínicas.", color: "bg-rose-100 text-rose-800" },
+  { id: 33, name: "Concrete Show", date: "11 a 13 de Agosto", month: "Agosto", location: "São Paulo Expo, São Paulo - SP", segment: "Construção", description: "Ponto de encontro da cadeia construtiva focada em concreto.", color: "bg-orange-100 text-orange-800" },
+  { id: 34, name: "Expointer 2026", date: "29 de Agosto a 06 de Setembro", month: "Agosto", location: "Esteio - RS", segment: "Agronegócio", description: "A maior feira de agropecuária a céu aberto da América Latina.", color: "bg-green-100 text-green-800" },
+
+  // SETEMBRO
+  { id: 35, name: "Beauty Fair 2026", date: "05 a 08 de Setembro", month: "Setembro", location: "Expo Center Norte, São Paulo - SP", segment: "Beleza", description: "A maior feira de beleza das Américas.", color: "bg-fuchsia-100 text-fuchsia-800" },
+  { id: 36, name: "Latam Retail Show", date: "15 a 17 de Setembro", month: "Setembro", location: "Expo Center Norte, São Paulo - SP", segment: "Hospitalidade", description: "O evento mais completo de varejo e consumo da América Latina.", color: "bg-slate-100 text-slate-800" },
+  { id: 46, name: "HIS - Healthcare Innovation Show", date: "16 e 17 de Setembro", month: "Setembro", location: "São Paulo Expo, São Paulo - SP", segment: "Saúde", description: "Principal evento de inovação e tecnologia voltado para a gestão de saúde.", color: "bg-rose-100 text-rose-800" },
+  { id: 37, name: "ACAPS Trade Show 2026", date: "22 a 24 de Setembro", month: "Setembro", location: "Pavilhão de Carapina - ES", segment: "Negócios", description: "Convenção capixaba de supermercados e feira de varejo.", color: "bg-cyan-100 text-cyan-800" },
+  { id: 38, name: "ProWine São Paulo", date: "29 de Setembro a 01 de Outubro", month: "Setembro", location: "Expo Center Norte, São Paulo - SP", segment: "Gastronomia", description: "A principal feira profissional de vinhos e destilados da América Latina.", color: "bg-pink-100 text-pink-800" },
+
+  // OUTUBRO
+  { id: 39, name: "Futurecom 2026", date: "06 a 08 de Outubro", month: "Outubro", location: "São Paulo Expo, São Paulo - SP", segment: "Tecnologia", description: "O maior evento de conectividade e tecnologia da América Latina.", color: "bg-blue-100 text-blue-800" },
+  { id: 40, name: "Superminas 2026", date: "20 a 22 de Outubro", month: "Outubro", location: "Expominas, Belo Horizonte - MG", segment: "Alimentos", description: "O maior evento mineiro para o setor supermercadista e panificação.", color: "bg-red-100 text-red-800" },
+  { id: 41, name: "Feira do Empreendedor Sebrae-SP", date: "17 a 20 de Outubro", month: "Outubro", location: "São Paulo Expo, São Paulo - SP", segment: "Negócios", description: "Maior evento de empreendedorismo do mundo focado em pequenas empresas.", color: "bg-cyan-100 text-cyan-800" },
+
+  // NOVEMBRO
+  { id: 42, name: "Semana Internacional do Café (SIC)", date: "11 a 13 de Novembro", month: "Novembro", location: "Expominas, Belo Horizonte - MG", segment: "Gastronomia", description: "Um dos maiores encontros do mundo voltado a produtores e especialistas de café.", color: "bg-pink-100 text-pink-800" },
+  { id: 43, name: "RD Summit 2026", date: "04 a 06 de Novembro", month: "Novembro", location: "São Paulo - SP", segment: "Inovação", description: "O maior evento de marketing, vendas e inovação da América Latina.", color: "bg-purple-100 text-purple-800" }
+];
+
+const SEGMENTS = ["Todos", "Alimentos", "Gastronomia", "Tecnologia", "Inovação", "Bem-estar", "Agronegócio", "Saúde", "Construção", "Logística", "Negócios", "Beleza", "Casa & Decoração", "Moda", "Hospitalidade"];
+
+export default function App() {
+  const [activeSegment, setActiveSegment] = useState("Todos");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedEvent, setSelectedEvent] = useState(null);
+
+  const filteredEvents = useMemo(() => {
+    return EVENTS_DATA.filter(event => {
+      const matchesSegment = activeSegment === "Todos" || event.segment === activeSegment;
+      const matchesSearch = event.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           event.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                           event.segment.toLowerCase().includes(searchQuery.toLowerCase());
+      return matchesSegment && matchesSearch;
+    }).sort((a, b) => a.id - b.id);
+  }, [activeSegment, searchQuery]);
+
+  return (
+    <div className="min-h-screen bg-gray-50 font-sans text-gray-900">
+      {/* Header */}
+      <header className="bg-white border-b sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="bg-blue-600 p-2 rounded-xl">
+              <Calendar className="text-white w-6 h-6" />
+            </div>
+            <div>
+              <h1 className="text-xl font-black tracking-tight text-gray-900 leading-none">Radar B2B</h1>
+              <span className="text-xs font-bold text-blue-600 uppercase tracking-widest">Calendário 2026</span>
+            </div>
+          </div>
+          
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+            <input 
+              type="text"
+              placeholder="Ex: Alimentos, Tecnologia, Rio de Janeiro..."
+              className="w-full pl-10 pr-4 py-3 bg-gray-100 border-none rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all text-sm"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+        </div>
+      </header>
+
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Filters */}
+        <section className="mb-10">
+          <div className="flex items-center gap-2 mb-4">
+            <Filter className="w-4 h-4 text-gray-500" />
+            <span className="text-sm font-bold text-gray-500 uppercase tracking-widest">Explorar por Setor</span>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {SEGMENTS.map(segment => (
+              <button
+                key={segment}
+                onClick={() => setActiveSegment(segment)}
+                className={`px-5 py-2.5 rounded-xl text-sm font-bold transition-all ${
+                  activeSegment === segment 
+                  ? 'bg-gray-900 text-white shadow-xl' 
+                  : 'bg-white text-gray-600 border border-gray-200 hover:border-blue-400 hover:text-blue-600'
+                }`}
+              >
+                {segment}
+              </button>
+            ))}
+          </div>
+        </section>
+
+        {/* Results Info */}
+        <div className="flex justify-between items-center mb-8">
+          <h2 className="text-2xl font-black text-gray-900">
+            {activeSegment === "Todos" ? "Eventos em Destaque" : `Feiras de ${activeSegment}`}
+          </h2>
+          <p className="text-sm font-medium text-gray-400">
+            <span className="text-gray-900 font-bold">{filteredEvents.length}</span> eventos no radar
+          </p>
+        </div>
+
+        {/* Events Grid */}
+        {filteredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {filteredEvents.map((event) => (
+              <div 
+                key={event.id}
+                className="group bg-white rounded-3xl border border-gray-100 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 overflow-hidden cursor-pointer"
+                onClick={() => setSelectedEvent(event)}
+              >
+                <div className="p-7">
+                  <div className="flex justify-between items-start mb-6">
+                    <span className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest ${event.color}`}>
+                      {event.segment}
+                    </span>
+                    <div className="flex flex-col items-end">
+                      <span className="text-xs font-black text-gray-300 uppercase leading-none mb-1">Ano</span>
+                      <span className="text-sm font-black text-blue-600">2026</span>
+                    </div>
+                  </div>
+                  
+                  <h3 className="text-xl font-black text-gray-900 mb-3 group-hover:text-blue-600 transition-colors leading-tight">
+                    {event.name}
+                  </h3>
+                  
+                  <div className="space-y-4 mb-8">
+                    <div className="flex items-center text-sm font-bold text-gray-500 gap-3">
+                      <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-blue-50 transition-colors">
+                        <Calendar className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                      </div>
+                      <span>{event.date}</span>
+                    </div>
+                    <div className="flex items-center text-sm font-bold text-gray-500 gap-3">
+                      <div className="bg-gray-50 p-2 rounded-lg group-hover:bg-blue-50 transition-colors">
+                        <MapPin className="w-4 h-4 text-gray-400 group-hover:text-blue-500" />
+                      </div>
+                      <span>{event.location}</span>
+                    </div>
+                  </div>
+
+                  <p className="text-sm text-gray-400 font-medium leading-relaxed line-clamp-2 h-10 italic">
+                    "{event.description}"
+                  </p>
+
+                  <div className="mt-8 pt-6 border-t border-gray-50 flex items-center justify-between">
+                    <span className="text-blue-600 text-xs font-black uppercase tracking-widest flex items-center gap-1 group-hover:gap-2 transition-all">
+                      Saber Mais <ChevronRight className="w-4 h-4" />
+                    </span>
+                    <Info className="w-5 h-5 text-gray-200" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="py-24 text-center bg-white rounded-[40px] border-4 border-dashed border-gray-100">
+            <div className="inline-flex p-6 rounded-full bg-gray-50 mb-6">
+              <Search className="w-10 h-10 text-gray-200" />
+            </div>
+            <h3 className="text-2xl font-black text-gray-900">Nada encontrado por aqui</h3>
+            <p className="text-gray-400 mt-2 font-medium">Tente buscar por termos mais genéricos ou mude o segmento.</p>
+            <button 
+              onClick={() => {setActiveSegment("Todos"); setSearchQuery("");}}
+              className="mt-8 bg-gray-900 text-white px-8 py-3 rounded-2xl font-bold shadow-lg shadow-gray-200"
+            >
+              Resetar Filtros
+            </button>
+          </div>
+        )}
+      </main>
+
+      {/* Modal Detalhes */}
+      {selectedEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 bg-gray-900/60 backdrop-blur-md transition-all">
+          <div className="bg-white rounded-[40px] w-full max-w-xl overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-300">
+            <div className={`h-4 ${selectedEvent.color.split(' ')[0]}`} />
+            <div className="p-10">
+              <div className="flex justify-between items-start mb-8">
+                <div>
+                  <span className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest ${selectedEvent.color} mb-4 inline-block`}>
+                    {selectedEvent.segment}
+                  </span>
+                  <h2 className="text-3xl font-black text-gray-900 leading-none">
+                    {selectedEvent.name}
+                  </h2>
+                </div>
+                <button 
+                  onClick={() => setSelectedEvent(null)}
+                  className="p-3 bg-gray-50 hover:bg-red-50 hover:text-red-500 rounded-2xl transition-all"
+                >
+                  <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 mb-10">
+                <div className="flex gap-5 p-5 bg-gray-50 rounded-[28px] items-center">
+                  <div className="bg-white p-3 rounded-2xl shadow-sm">
+                    <Calendar className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Calendário</p>
+                    <p className="text-gray-900 font-bold">{selectedEvent.date}</p>
+                  </div>
+                </div>
+
+                <div className="flex gap-5 p-5 bg-gray-50 rounded-[28px] items-center">
+                  <div className="bg-white p-3 rounded-2xl shadow-sm">
+                    <MapPin className="w-6 h-6 text-blue-600" />
+                  </div>
+                  <div>
+                    <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest leading-none mb-1">Pavilhão</p>
+                    <p className="text-gray-900 font-bold">{selectedEvent.location}</p>
+                  </div>
+                </div>
+
+                <div className="p-6 bg-blue-50 rounded-[28px]">
+                  <p className="text-[10px] font-black text-blue-400 uppercase tracking-widest mb-3">O que esperar</p>
+                  <p className="text-sm text-blue-900 font-bold leading-relaxed">
+                    {selectedEvent.description}
+                  </p>
+                  <p className="mt-4 text-xs text-blue-800 opacity-70">
+                    Prepare-se para sessões de networking, rodadas de negócios internacionais e as principais inovações do setor de {selectedEvent.segment.toLowerCase()}.
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button className="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-black py-4 rounded-2xl transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-100">
+                  <ExternalLink className="w-5 h-5" /> SITE OFICIAL
+                </button>
+                <button className="flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 font-black py-4 rounded-2xl transition-all">
+                  SALVAR AGENDA
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer className="bg-white border-t pt-16 pb-12">
+        <div className="max-w-7xl mx-auto px-4">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-10 mb-12">
+            <div className="text-center md:text-left">
+              <p className="text-sm text-gray-400 font-medium">Fique por dentro de cada oportunidade em 2026.</p>
+            </div>
+            
+            <div className="flex gap-10">
+               <div className="text-center">
+                 <p className="text-3xl font-black text-gray-900">30+</p>
+                 <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Feiras</p>
+               </div>
+               <div className="text-center">
+                 <p className="text-3xl font-black text-gray-900">12</p>
+                 <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Meses</p>
+               </div>
+               <div className="text-center">
+                 <p className="text-3xl font-black text-gray-900">14</p>
+                 <p className="text-[10px] text-gray-400 uppercase font-black tracking-widest">Setores</p>
+               </div>
+            </div>
+          </div>
+          <div className="pt-8 border-t border-gray-50 text-center">
+            <p className="text-gray-300 text-[10px] font-bold uppercase tracking-widest">© 2026 Radar B2B - Inteligência de Eventos Corporativos</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+}
